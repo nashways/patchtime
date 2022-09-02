@@ -40,7 +40,7 @@ w4d6h09
 0 * * * * bash -c '/usr/bin/awx job_templates launch "Patch OS" --extra_vars "survey_hosts: patchwindow_$(/opt/scripts/patchtime_tue.sh)"'  
 
 ## Roadmap
-It would be cool to rewrite this is something other than bash and package it in an rpm. Or even extend a version of cron with this stuff.
+It would be cool to rewrite this is something other than bash and package it in a rpm. Or even extend a version of cron with this stuff.
 
 ## Contributing
 Yes, please!
