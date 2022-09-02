@@ -2,7 +2,7 @@
 So the problem is to schedule stuff monthly in a reliable manner. Let say you want **Leg A** of a solution to do someting like patching on the first tuesday of the month and **Leg B** on the first wednesday. Using cron this would be a mess as **leg A** would sometimes be executed six days after **Leg B** depending on the month.
 
 ## Description
-These little effers will tell you what day of the month it is. Sound trivial but they print stuff like **w2d6h23**, it is all based on when the first Monday or Tuesday is. Weeks are considered Monday to Sunday, week 1 (w1) is when the first Tuesday or Monday of the month occurs. 
+These little scripts will tell you what day of the month it is. Sound trivial but they print stuff like **w2d6h23**, it is all based on when the first Monday or Tuesday is. Weeks are considered Monday to Sunday, week 1 (w1) is when the first Tuesday or Monday of the month occurs. 
 When counting from Tuesdays, the whole week including the Monday before Tuesday is considered part of the week. This is when you take out a calendar and have a look. The last week of the month will most often have days from next month, these days are counted as part of the last week.
 You can use this to sanely schedule **w1d1h00 - w4d7h23**. Week 5 will be printed as expected but as it does not always exist, it is not the best of ideas to use it in scheduling.
 
