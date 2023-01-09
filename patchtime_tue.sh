@@ -9,7 +9,6 @@
 
 #Get todays number
 d=$(expr $(date +%d) + 0)
-#echo "dag: $d Månad: $(date "+%m")"
 
 function cal_var ()
 {
