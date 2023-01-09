@@ -52,7 +52,6 @@ function main ()
 
 		#Reculate todays number, add todays number to number of days last month so we are on 29-38th
 		d=$(expr $d + $(cal -m $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | xargs echo | awk '{print $NF}'))
-		#echo "Uppdaterad dag: $d"
 
 		#If the first week of previous month has less than 5 days subtract 1 from the week calculation
 		if [[ $(expr $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3|tail -n 1|tr ' ' '\n'|grep -v ^$|wc -l) + 0) -le 5 ]]; then
@@ -64,7 +63,6 @@ function main ()
 		#Stay on this month and subtract 1 from current week if first week has less than 5 days
 		if [[ $(expr $(cal_var |head -n +3|tail -n 1|tr ' ' '\n'|grep -v ^$|wc -l) + 0) -le 5 ]]; then
 			currentweek=$(expr $(echo $(echo "$(cal_var)$(echo -n " ")"|sed -n "3,$ p" | egrep -n "^$d | $d | $d$" | cut -d ":" -f1)|cut -d " " -f1) - 1)
-			#echo "minus 1 på vecka"
 		else
 			currentweek=$(echo $(echo "$(cal_var)$(echo -n " ")"|sed -n "3,$ p" | egrep -n "^$d | $d | $d$" | cut -d ":" -f1)|cut -d " " -f1)
 		fi
