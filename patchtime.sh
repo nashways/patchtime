@@ -15,18 +15,34 @@
 #   
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-echo -e "\n    Patch Time  Copyright (C) 2023  Nashway
-    This program comes with ABSOLUTELY NO WARRANTY; for details type \`show w'.
+
+
+if [[ "$@" == "--?" ]]; then 
+  echo -e "\n    Patch Time  Copyright (C) 2023  Nashway
+    This program comes with ABSOLUTELY NO WARRANTY.\n
     This is free software, and you are welcome to redistribute it
-    under certain conditions; type \`show c' for details.\n"
-if [[ "$@" == "show w" ]]; then
-  echo -e "    \e]8;;https://www.gnu.org/licenses/gpl-3.0.html#section15\aDisclaimer of Warranty\e]8;;\a\n"
-elif [[ "$@" == "show c" ]]; then
-  echo -e "    \e]8;;https://www.gnu.org/licenses/gpl-3.0.html#terms\aTerms and Conditions\e]8;;\a\n"
+    under certain conditions.\n \n
+    Description\n    
+    Patchtime prints a patch window name based on counting weeks from first Monday or Tuesday of the month.
+    Example: w4d412 (Which means week 4, Thursday and 12 a clock.)
+    This scipt will borrow the first few days from next months week 1 to complete last week of the month.\n
+    Valid windows are w1d1h1-w4d7h23.\n
+
+    Usage
+    patchtime.sh -t \t Default is to count first week from Monday, to set Tuesday.
+    patchtime.sh -l \t Links to Disclamer of warranty and Terms and Conditions\n"
+  exit 0
+  fi
+if [[ "$@" == "-l" ]]; then
+  echo -e "    \e]8;;https://www.gnu.org/licenses/gpl-3.0.html#section15\aDisclaimer of Warranty\e]8;;\a"
+  echo -e "    https://www.gnu.org/licenses/gpl-3.0.html#section15 \n"
+  echo -e "    \e]8;;https://www.gnu.org/licenses/gpl-3.0.html#terms\aTerms and Conditions\e]8;;\a"
+  echo -e "    https://www.gnu.org/licenses/gpl-3.0.html#terms \n"
+  exit 0
 fi
 
 # Credits:
-# Nashway
+# Nashway (Nashways)
 # ifthenfi
 
 # Description:
@@ -38,6 +54,9 @@ fi
 
 # Set DAY="Tue" for Tuesday, anything else counts as Monday.
 DAY=""
+if [[ "$@" == "-t" ]]; then
+  DAY="Tue"
+fi
 
 # Get the number of the current day.
 D=$(expr $(date +%d) + 0)
