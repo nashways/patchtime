@@ -92,33 +92,53 @@ cal_var () {
 }
 
 main () {	
-	# Find Number of Days Week 1 of this month.
-	NDW1=$(expr $(cal_var $(date "+%m %Y") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)
-	
-	# If NDW1 is greater than todays number and less than 5 we need to be on the fake end of previous month.
-	if [[ $NDW1 -ge $D ]] && [[ $NDW1 -le 5 ]]; then
-		# Reculate todays number, add todays number to number of days last month so we are on 29-38th.
-		D=$(expr $D + $(cal -m $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | xargs echo | awk '{print $NF}'))
-
-		# If the first week of previous month has less than 5 days subtract 1 from the week calculation.
-		if [[ $(expr $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0) -le 5 ]]; then
-			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 1)
-		else
-			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 0)
-		fi
-	else 
-		# Stay on this month and subtract 1 from current week if first week has less than 5 days.
-		if [[ $(expr $(cal_var | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0) -le 5 ]]; then
-			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 1)
-		else
-			CURRENTWEEK=$(echo $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1)
-		fi
-	fi
-  
-  # Override if tomorrow is the 1 and a tuesday, count this monday as week 1.
+  # Find Number of Days Week 1 of this month.
+  NDW1=$(expr $(cal_var $(date "+%m %Y") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)
+  		
   if [[ $DAY == "Tue" ]]; then
+    # If NDW1 is greater than todays number and less than 5 we need to be on the fake end of previous month.
+    if [[ $NDW1 -ge $D ]] && [[ $NDW1 -le 5 ]]; then
+      # Reculate todays number, add todays number to number of days last month so we are on 29-38th.
+      D=$(expr $D + $(cal -m $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | xargs echo | awk '{print $NF}'))
+
+      # If the first week of previous month has less than 5 days subtract 1 from the week calculation.
+      if [[ $(expr $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0) -le 5 ]]; then
+        CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 1)
+      else
+        CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 0)
+      fi
+    else 
+      # Stay on this month and subtract 1 from current week if first week has less than 5 days.
+      if [[ $(expr $(cal_var | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0) -le 5 ]]; then
+        CURRENTWEEK=$(expr $(echo $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 1)
+      else
+        CURRENTWEEK=$(echo $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1)
+      fi
+    fi
+  
+    # Override if tomorrow is the 1 and a tuesday, count this monday as week 1.
     if [ $(expr $(date +%d --date="next day") + 0) == 1 ] && [ $(/bin/date +\%a --date="next day") == "Tue" ]; then
       CURRENTWEEK=$(echo 1)
+    fi
+  else
+    # If NDW1 is greater than todays number and less than 7 we need to be on the fake end of previous month.
+    if [[ $NDW1 -ge $D ]] && [[ $NDW1 -lt 7 ]]; then
+      # Reculate todays number, add todays number to number of days last month so we are on 29-38th.
+      D=$(expr $D + $(cal -m $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | xargs echo | awk '{print $NF}'))
+
+      # If the first week of previous month has less than 7 days subtract 1 from the week calculation.
+      if [[ $(expr $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0) -lt 7 ]]; then
+        CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 1)
+      else
+        CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 0)
+      fi
+    else
+      # Stay on this month and subtract 1 from current week if first week has less than 7 days.
+      if [[ $(expr $(cal_var | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0) -lt 7 ]]; then
+        CURRENTWEEK=$(expr $(echo $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1) - 1)
+      else
+        CURRENTWEEK=$(echo $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1) | cut -d " " -f1)
+      fi
     fi
   fi
 }

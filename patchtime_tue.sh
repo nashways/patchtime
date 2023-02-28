@@ -1,5 +1,5 @@
 #!/bin/bash
-# This will print the patch window name based on counting weeks from first tuesday of the month.
+# This will print the patch window name based on counting weeks from first Tuesday of the month.
 # ex w4d412
 # week 4, thur and 12 a clock
 # This scipt will borrow the first few days from next months week one if it does not have a monday to complete last week of the month.
