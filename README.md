@@ -30,8 +30,8 @@ $ ./patchtime.sh
 w3d6h09
 
 ###### Counting from the first Monday is default, "-t" counts from the first Tuesday.
-Faketime is mearly to produce the example
 
+#Faketime is mearly to produce the example
 $ faketime "2023-07-31 08:00:00" ./patchtime.sh  
 w5d1h08  
 $ faketime "2023-07-31 08:00:00" ./patchtime.sh -t  
@@ -41,24 +41,20 @@ w1d1h08
 $ faketime "2023-08-7 08:00:00" ./patchtime.sh -t  
 w2d1h08  
 
-#Set the variable DAY inside the script to Tue and it will count from tuesdays.
-$ ./patchtime.sh  
-w4d6h09  
-
 
 ##### Combining with cron to run scripts syncing repos and patching hosts.
-0 * * * * [ $(/opt/scripts/patchtime.sh) == "**w1d1h00**" ] && /opt/scripts/**sync_repos.sh** && /opt/scripts/**publish_phase1.sh**  
-0 * * * * [ $(/opt/scripts/patchtime.sh) == "**w1d1h10**" ] && /opt/scripts/patch_**test_leg-A**.sh  
-0 * * * * [ $(/opt/scripts/patchtime.sh) == "**w1d2h10**" ] && /opt/scripts/patch_**test_leg-B**.sh  
-0 * * * * [ $(/opt/scripts/patchtime.sh) == "**w3d1h00**" ] && /opt/scripts/**publish_phase2.sh**  
-0 * * * * [ $(/opt/scripts/patchtime.sh) == "**w3d1h20**" ] && /opt/scripts/patch_**prod_leg-A**.sh  
-0 * * * * [ $(/opt/scripts/patchtime.sh) == "**w3d2h21**" ] && /opt/scripts/patch_**prod_leg-B**.sh  
+0 * * * * [ $(/opt/scripts/patchtime.sh -t) == "**w1d1h00**" ] && /opt/scripts/**sync_repos.sh** && /opt/scripts/**publish_phase1.sh**  
+0 * * * * [ $(/opt/scripts/patchtime.sh -t) == "**w1d1h10**" ] && /opt/scripts/patch_**test_leg-A**.sh  
+0 * * * * [ $(/opt/scripts/patchtime.sh -t) == "**w1d2h10**" ] && /opt/scripts/patch_**test_leg-B**.sh  
+0 * * * * [ $(/opt/scripts/patchtime.sh -t) == "**w3d1h00**" ] && /opt/scripts/**publish_phase2.sh**  
+0 * * * * [ $(/opt/scripts/patchtime.sh -t) == "**w3d1h20**" ] && /opt/scripts/patch_**prod_leg-A**.sh  
+0 * * * * [ $(/opt/scripts/patchtime.sh -t) == "**w3d2h21**" ] && /opt/scripts/patch_**prod_leg-B**.sh  
 
 
 ##### Combining with cron and AWX/Tower/Ansible, the inventory in AWX/Ansible is pulled from Netbox where each host has a defined patchwindow.
-0 * * * * bash -c '/usr/bin/awx job_templates launch "Notify patch stakeholders" --extra_vars "survey_hosts: patchwindow_$(/usr/bin/faketime -f "+24h" /opt/scripts/patchtime.sh)"'  
-0 * * * * bash -c '/usr/bin/awx job_templates launch "Monitoring Schedule Downtime" --extra_vars "survey_hosts: patchwindow_$(/usr/bin/faketime -f "+2h" /opt/scripts/patchtime.sh)"'  
-0 * * * * bash -c '/usr/bin/awx job_templates launch "Patch OS" --extra_vars "survey_hosts: patchwindow_$(/opt/scripts/patchtime.sh)"'  
+0 * * * * bash -c '/usr/bin/awx job_templates launch "Notify patch stakeholders" --extra_vars "survey_hosts: patchwindow_$(/usr/bin/faketime -f "+24h" /opt/scripts/patchtime.sh -t)"'  
+0 * * * * bash -c '/usr/bin/awx job_templates launch "Monitoring Schedule Downtime" --extra_vars "survey_hosts: patchwindow_$(/usr/bin/faketime -f "+2h" /opt/scripts/patchtime.sh -t)"'  
+0 * * * * bash -c '/usr/bin/awx job_templates launch "Patch OS" --extra_vars "survey_hosts: patchwindow_$(/opt/scripts/patchtime.sh -t)"'  
 
 ## Roadmap
 It would be cool to rewrite this is something other than bash and package it in a rpm. Or even extend a version of cron with this stuff.
