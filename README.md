@@ -29,8 +29,9 @@ $ date "+%Y-%m-%d %H:%M"
 $ ./patchtime.sh 
 w3d6h09
 
-####### Counting from the first Monday is default, "-t" counts from the first Tuesday.
-# Faketime is mearly to produce the example
+###### Counting from the first Monday is default, "-t" counts from the first Tuesday.
+Faketime is mearly to produce the example
+
 $ faketime "2023-07-31 08:00:00" ./patchtime.sh
 w5d1h08
 $ faketime "2023-07-31 08:00:00" ./patchtime.sh -t
