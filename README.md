@@ -32,14 +32,14 @@ w3d6h09
 ###### Counting from the first Monday is default, "-t" counts from the first Tuesday.
 Faketime is mearly to produce the example
 
-$ faketime "2023-07-31 08:00:00" ./patchtime.sh
-w5d1h08
-$ faketime "2023-07-31 08:00:00" ./patchtime.sh -t
-w1d1h08
-$ faketime "2023-08-7 08:00:00" ./patchtime.sh
-w1d1h08
-$ faketime "2023-08-7 08:00:00" ./patchtime.sh -t
-w2d1h08
+$ faketime "2023-07-31 08:00:00" ./patchtime.sh  
+w5d1h08  
+$ faketime "2023-07-31 08:00:00" ./patchtime.sh -t  
+w1d1h08  
+$ faketime "2023-08-7 08:00:00" ./patchtime.sh  
+w1d1h08  
+$ faketime "2023-08-7 08:00:00" ./patchtime.sh -t  
+w2d1h08  
 
 #Set the variable DAY inside the script to Tue and it will count from tuesdays.
 $ ./patchtime.sh  
