@@ -70,3 +70,4 @@ GNU GPLv3
 
 ## Project status
 Not sure how much energy I have to push this further, if you want to fork or just grab the idea, go ahead.
+<meta name="google-site-verification" content="QJVq0S05HsKyeojINl9dETDmvf8fIYUf2zwheYq9bc4" />
