@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<!--
+	Dattatray Dagale
+-->
+<html>
+	<head>
+    <meta name="google-site-verification" content="QJVq0S05HsKyeojINl9dETDmvf8fIYUf2zwheYq9bc4" />
+		<title> Patchtime </title>
+	</head>
+	<body class="is-preload">
+<h1 id="the-problem">The problem</h1>
+<p>So the problem is to schedule tasks monthly and consecutively in a reliable manner. Let say you want <strong>Leg A</strong> of a solution to do someting like patching on the first tuesday of the month and <strong>Leg B</strong> on the first wednesday. Using cron this would be a mess as <strong>leg A</strong> would sometimes be executed six days after <strong>Leg B</strong> depending on the month.</p>
+<h2 id="the-solution">The solution</h2>
+<p>Start counting weeks at a repeatable point in the month like the first monday or first tuesday. A little bit like Microsoft defined &quot;Patch tuesday&quot; as the second tuesday of the month at 10:00 PST.</p>
+<h2 id="description">Description</h2>
+<p>This/these litte script will tell you what day of the month it is. Sound trivial but it prints time like this <strong>w2d6h23</strong>. The output is simple <strong>w</strong> for week, <strong>d</strong> for day <strong>h</strong> for hour.</p>
+<p>The script can count weeks from the first Monday of Tuesday of the month. When counting from Tuesdays, the whole week including the Monday before Tuesday is considered part of the week. This is when you take out a calendar and have a look. The last week of the month will sometimes not be a complete week, the script will then &quot;steal&quot; days from next month as they are not otherwise used in next month&#39;s week one.</p>
+<p>This means you can use this to sanely schedule <strong>w1d1h00 - w4d7h23</strong>. Some months will have a Week 5 and it will be printed as expected but as it does not always exist, it&#39;s not the best of ideas to use it.</p>
+<p>This is great to use for scheduling monthly patching, lets say you want your repo to sync and publish to your <strong>test-environment</strong> at <strong>w1d1h00</strong>. You might then want your <strong>test-environment</strong> to patch <strong>leg A</strong> of your redundant solution at <strong>w1d1h10</strong> and <strong>leg B</strong> at <strong>w1d2h10</strong>. Giving you a day to notice any issues in between.</p>
+<p>Lets then say you want to publish the updated repo to <strong>prod</strong>, at <strong>w3d1h00</strong>, a good week later running and evaluating your patched <strong>test-environment</strong>. You could the patch <strong>prod</strong> <strong>leg A</strong> at <strong>w3d1h20</strong> and <strong>B</strong> at <strong>w3d1h21</strong>. </p>
+<p>You now probably understand these scripts are written with cron in mind.</p>
+<h2 id="source-the-idea">Source the idea</h2>
+<p>This idea came up when running numerous systems with a plethora of customers, where each customer could define what patchwindow their servers should use via an interface.
+The Automation Management Tool of your choice would be asked to read members of the patchwindow every hour and patch via a simple cron, check out the scheaduled examples below.
+When running large systems you often have monitoring of some sort, and patching with reboot is always an issue. So you want to notify the monitoring system beforehand. This little script do not handle delays or preemtive strikes like that but will combine nicely with faketime, <a href="https://www.rpmfind.net/linux/rpm2html/search.php?query=libfaketime">https://www.rpmfind.net/linux/rpm2html/search.php?query=libfaketime</a>.</p>
+<h2 id="usage">Usage</h2>
+<h5 id="simple-example">Simple example</h5>
+<p>$ date &quot;+%Y-%m-%d %H:%M&quot;<br>2022-11-26 09:40<br>$ ./patchtime.sh 
+w3d6h09</p>
+<h6 id="counting-from-the-first-monday-is-default-t-counts-from-the-first-tuesday-">Counting from the first Monday is default, &quot;-t&quot; counts from the first Tuesday.</h6>
+<p>#Faketime is mearly to produce the example
+$ faketime &quot;2023-07-31 08:00:00&quot; ./patchtime.sh<br>w5d1h08<br>$ faketime &quot;2023-07-31 08:00:00&quot; ./patchtime.sh -t<br>w1d1h08<br>$ faketime &quot;2023-08-7 08:00:00&quot; ./patchtime.sh<br>w1d1h08<br>$ faketime &quot;2023-08-7 08:00:00&quot; ./patchtime.sh -t<br>w2d1h08  </p>
+<h5 id="combining-with-cron-to-run-scripts-syncing-repos-and-patching-hosts-">Combining with cron to run scripts syncing repos and patching hosts.</h5>
+<p>0 <em> </em> <em> </em> [ $(/opt/scripts/patchtime.sh -t) == &quot;<strong>w1d1h00</strong>&quot; ] &amp;&amp; /opt/scripts/<strong>sync_repos.sh</strong> &amp;&amp; /opt/scripts/<strong>publish_phase1.sh</strong><br>0 <em> </em> <em> </em> [ $(/opt/scripts/patchtime.sh -t) == &quot;<strong>w1d1h10</strong>&quot; ] &amp;&amp; /opt/scripts/patch_<strong>test_leg-A</strong>.sh<br>0 <em> </em> <em> </em> [ $(/opt/scripts/patchtime.sh -t) == &quot;<strong>w1d2h10</strong>&quot; ] &amp;&amp; /opt/scripts/patch_<strong>test_leg-B</strong>.sh<br>0 <em> </em> <em> </em> [ $(/opt/scripts/patchtime.sh -t) == &quot;<strong>w3d1h00</strong>&quot; ] &amp;&amp; /opt/scripts/<strong>publish_phase2.sh</strong><br>0 <em> </em> <em> </em> [ $(/opt/scripts/patchtime.sh -t) == &quot;<strong>w3d1h20</strong>&quot; ] &amp;&amp; /opt/scripts/patch_<strong>prod_leg-A</strong>.sh<br>0 <em> </em> <em> </em> [ $(/opt/scripts/patchtime.sh -t) == &quot;<strong>w3d2h21</strong>&quot; ] &amp;&amp; /opt/scripts/patch_<strong>prod_leg-B</strong>.sh  </p>
+<h5 id="combining-with-cron-and-awx-tower-ansible-the-inventory-in-awx-ansible-is-pulled-from-netbox-where-each-host-has-a-defined-patchwindow-">Combining with cron and AWX/Tower/Ansible, the inventory in AWX/Ansible is pulled from Netbox where each host has a defined patchwindow.</h5>
+<p>0 <em> </em> <em> </em> bash -c &#39;/usr/bin/awx job_templates launch &quot;Notify patch stakeholders&quot; --extra_vars &quot;survey<em>hosts: patchwindow</em>$(/usr/bin/faketime -f &quot;+24h&quot; /opt/scripts/patchtime.sh -t)&quot;&#39;<br>0 <em> </em> <em> </em> bash -c &#39;/usr/bin/awx job_templates launch &quot;Monitoring Schedule Downtime&quot; --extra_vars &quot;survey<em>hosts: patchwindow</em>$(/usr/bin/faketime -f &quot;+2h&quot; /opt/scripts/patchtime.sh -t)&quot;&#39;<br>0 <em> </em> <em> </em> bash -c &#39;/usr/bin/awx job_templates launch &quot;Patch OS&quot; --extra_vars &quot;survey<em>hosts: patchwindow</em>$(/opt/scripts/patchtime.sh -t)&quot;&#39;  </p>
+<h2 id="roadmap">Roadmap</h2>
+<p>It would be cool to rewrite this is something other than bash and package it in a rpm. Or even extend a version of cron with this stuff.</p>
+<h2 id="contributing">Contributing</h2>
+<p>Yes, please!, Just say hi and I will add you as a collaborator if you want.</p>
+<h2 id="authors-and-acknowledgment">Authors and acknowledgment</h2>
+<p>Google is supposedly your friend.</p>
+<h2 id="license">License</h2>
+<p>GNU GPLv3</p>
+<h2 id="project-status">Project status</h2>
+<p>Not sure how much energy I have to push this further, if you want to fork or just grab the idea, go ahead.</p>
+
+	</body>
+</html>
+
+
