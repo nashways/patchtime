@@ -24,7 +24,7 @@ if [[ "$@" == "--?" ]]; then
     under certain conditions.\n \n
     Description\n    
     Patchtime prints a patch window name based on counting weeks from first Monday or Tuesday of the month.
-    Example: w4d412 (Which means week 4, Thursday and 12 a clock.)
+    Example: w4d4h12 (Which means week 4 of the month, Thursday and 12 a clock.)
     This scipt will borrow the first few days from next months week 1 to complete last week of the month.\n
     Valid windows are w1d1h1-w4d7h23.\n
 
@@ -47,7 +47,7 @@ fi
 
 # Description:
 # Prints a patch window name based on counting weeks from first Monday or Tuesday of the month.
-# Example: w4d412 (The w4d412 means: week 4, Thursday and 12 a clock.)
+# Example: w4d4h12 (The w4d4h12 means: week 4 of the month, Thursday and 12 a clock.)
 # This scipt will borrow the first few days from next months week 1 if it does not have a Monday or Tuesday to complete last week of the month.
 # It will also consider monday before a tuesday the first as week day 1 of week 1.
 # You can only trust w1d1 to w4d7 as week 5 does not always exist.
