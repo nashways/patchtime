@@ -54,16 +54,16 @@ function main ()
 
 		#If the first week of previous month has less than 7 days subtract 1 from the week calculation
 		if [[ $(expr $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3|tail -n 1|tr ' ' '\n'|grep -v ^$|wc -l) + 0) -lt 7 ]]; then
-			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")"|sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1) - 1)
+			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")"|sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1) - 1)
 		else
-			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")"|sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1) - 0)
+			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")"|sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1) - 0)
 		fi
 	else 
 		#Stay on this month and subtract 1 from current week if first week has less than 7 days
 		if [[ $(expr $(cal_var |head -n +3|tail -n 1|tr ' ' '\n'|grep -v ^$|wc -l) + 0) -lt 7 ]]; then
-			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var)$(echo -n " ")"|sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1) - 1)
+			CURRENTWEEK=$(expr $(echo $(echo "$(cal_var)$(echo -n " ")"|sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1) - 1)
 		else
-			CURRENTWEEK=$(echo $(echo "$(cal_var)$(echo -n " ")"|sed -n "3,$ p" | egrep -n "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1)
+			CURRENTWEEK=$(echo $(echo "$(cal_var)$(echo -n " ")"|sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1)|cut -d " " -f1)
 		fi
 	fi
 
