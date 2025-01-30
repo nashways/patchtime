@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+LC_TIME="en_US.UTF-8"
 
 #    Patch Time.  Prints a patch window name.
 #    Copyright (C) 2023  Nashway
