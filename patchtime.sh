@@ -94,7 +94,7 @@ cal_var () {
 
 find_currentweek () {	
   # Find Number of Days Week 1 of this month.
-  NDW1=$(( $(cal_var $(date "+%m %Y") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0))
+  local NDW1=$(( $(cal_var $(date "+%m %Y") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0))
   local PREVIOUS_MONTH=$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")
 
   if [[ $DAY == "Tue" ]]; then
