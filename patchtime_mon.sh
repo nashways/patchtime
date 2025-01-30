@@ -1,4 +1,5 @@
 #!/bin/bash
+LC_TIME="en_US.UTF-8"
 # This will print the patch window name based on counting weeks from first Monday of the month.
 # ex w4d412
 # week 4, thur and 12 a clock
