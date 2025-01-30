@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 LC_TIME="en_US.UTF-8"
-
 #    Patch Time.  Prints a patch window name.
 #    Copyright (C) 2023  Nashway
 #   
@@ -60,7 +59,8 @@ if [[ "$*" == "-t" ]]; then
 fi
 
 # Get the number of the current day.
-D=$(( $(date +%d) + 0))
+# Need the base 10 due to 08
+D=$(( 10#$(date +%d) + 0))
 
 cal_var () {
   # Get variables
@@ -100,13 +100,13 @@ find_currentweek () {
     # If NDW1 is greater than todays number and less than 5 we need to be on the fake end of previous month.
     if [[ $NDW1 -ge $D ]] && [[ $NDW1 -le 5 ]]; then
       # Reculate todays number, add todays number to number of days last month so we are on 29-38th.
-      D=$(( $D + $(cal -m "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")" | xargs echo | awk '{print $NF}')))
+      D=$(expr $D + $(cal -m $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | xargs echo | awk '{print $NF}'))
 
       # If the first week of previous month has less than 5 days subtract 1 from the week calculation.
-      if [[ $(( $(cal_var "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")" | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -le 5 ]]; then
-        CURRENTWEEK=$(( $(echo "$(cal_var "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")")$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
+      if [[ $(( $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -le 5 ]]; then
+        CURRENTWEEK=$(( $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
       else
-        CURRENTWEEK=$(( $(echo "$(cal_var "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")")$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 0))
+        CURRENTWEEK=$(( $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 0))
       fi
     else 
       # Stay on this month and subtract 1 from current week if first week has less than 5 days.
@@ -117,21 +117,21 @@ find_currentweek () {
       fi
     fi
   
-    # Override if tomorrow is the 1 and a tuesday, count this monday as week 1.
-    if [ $(( $(date +%d --date="next day") + 0)) == 1 ] && [ "$(/bin/date +\%a --date="next day")" == "Tue" ]; then
+    # Override if tomorrow is the 1 and a tuesday, count this monday as week 1. need base 10 here
+    if [ $(( 10#$(date +%d --date="next day") + 0)) == 1 ] && [ "$(/bin/date +\%a --date="next day")" == "Tue" ]; then
       CURRENTWEEK=$((1))
     fi
   else
     # If NDW1 is greater than todays number and less than 7 we need to be on the fake end of previous month.
     if [[ $NDW1 -ge $D ]] && [[ $NDW1 -lt 7 ]]; then
-      # Reculate todays number, add todays number to number of days last month so we are on 29-38th.
-      D=$(( "$D" + $(cal -m "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")" | xargs echo | awk '{print $NF}')))
+      # Reculate todays number, add todays number to number of days last month so we are on 29-38th. borken
+      D=$(expr $D + $(cal -m $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | xargs echo | awk '{print $NF}'))
 
       # If the first week of previous month has less than 7 days subtract 1 from the week calculation.
-      if [[ $(( $(cal_var "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")" | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -lt 7 ]]; then
-        CURRENTWEEK=$(( $(echo "$(cal_var "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")")$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
+      if [[ $(( $(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -lt 7 ]]; then
+        CURRENTWEEK=$(( $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
       else
-        CURRENTWEEK=$(( $(echo "$(cal_var "$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")")$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 0))
+        CURRENTWEEK=$(( $(echo "$(cal_var $(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day"))$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 0))
       fi
     else
       # Stay on this month and subtract 1 from current week if first week has less than 7 days.
