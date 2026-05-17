@@ -28,24 +28,25 @@ def days_in_first_week(year: int, month: int) -> int:
     return sum(1 for d in cal[0] if d != 0)
 
 
-def get_patch_week(dt: date, use_tuesday: bool = False) -> int:
+def get_patch_week(dt: date, anchor: int = 1) -> int:
     """
     Return the patch week number (1-4) for a given date.
 
-    Weeks are counted from the first Monday (or Tuesday if use_tuesday=True)
-    of the month. Days before that anchor day belong to the previous month's
-    last patch week.
+    Weeks are counted from the first occurrence of `anchor` (ISO weekday,
+    1=Mon … 7=Sun) in the month. Days before that anchor day belong to the
+    previous month's last patch week.
 
-    Tuesday mode threshold is 6 (ndw1 <= 5 means partial first week),
-    Monday mode threshold is 7 (ndw1 <= 6 means partial first week).
+    threshold = 8 - anchor; ndw1 < threshold means the first row is a
+    partial week that doesn't contain the anchor day.
     """
-    threshold = 6 if use_tuesday else 7
+    if not 1 <= anchor <= 7:
+        raise ValueError(f"anchor must be 1..7, got {anchor}")
+    threshold = 8 - anchor
 
-    # Special Tuesday override: the Monday before a Tuesday 1st counts as w1.
-    if use_tuesday:
-        tomorrow = dt + timedelta(days=1)
-        if tomorrow.day == 1 and tomorrow.isoweekday() == 2:  # Tuesday
-            return 1
+    # Override: the day before an anchor-day 1st counts as w1.
+    tomorrow = dt + timedelta(days=1)
+    if tomorrow.day == 1 and tomorrow.isoweekday() == anchor:
+        return 1
 
     cal_m = calendar.monthcalendar(dt.year, dt.month)
     ndw1 = days_in_first_week(dt.year, dt.month)
@@ -73,7 +74,7 @@ def get_patch_week(dt: date, use_tuesday: bool = False) -> int:
         return row_idx + 1
 
 
-def patch_window(dt: date = None, use_tuesday: bool = False, hour: int = None) -> str:
+def patch_window(dt: date = None, anchor: int = 1, hour: int = None) -> str:
     """
     Return the patch window string, e.g. 'w2d4h09'.
 
@@ -86,7 +87,7 @@ def patch_window(dt: date = None, use_tuesday: bool = False, hour: int = None) -
     if hour is None:
         hour = datetime.now().hour
 
-    week = get_patch_week(dt, use_tuesday)
+    week = get_patch_week(dt, anchor)
     day  = dt.isoweekday()
     return f"w{week}d{day}h{hour:02d}"
 
@@ -110,7 +111,8 @@ def print_help():
     Valid windows are w1d1h00 - w4d7h23.
 
     Usage
-    patchtime.py -t    Default is to count from Monday; set this for Tuesday.
+    patchtime.py -a N  Anchor weekday (1=Mon … 7=Sun). Default 1 (Monday).
+    patchtime.py -t    Deprecated alias for -a 2 (Tuesday anchor).
     patchtime.py -l    Links to Disclaimer of Warranty and Terms and Conditions
 """)
 
@@ -133,9 +135,21 @@ def main():
         print_links()
         sys.exit(0)
 
-    use_tuesday = "-t" in args
+    anchor = 1
+    if "-t" in args:
+        anchor = 2
+    if "-a" in args:
+        i = args.index("-a")
+        try:
+            anchor = int(args[i + 1])
+        except (IndexError, ValueError):
+            print("error: -a requires an integer 1..7", file=sys.stderr)
+            sys.exit(2)
+        if not 1 <= anchor <= 7:
+            print(f"error: anchor must be 1..7, got {anchor}", file=sys.stderr)
+            sys.exit(2)
 
-    result = patch_window(use_tuesday=use_tuesday)
+    result = patch_window(anchor=anchor)
     print(result)
 
 

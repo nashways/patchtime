@@ -27,7 +27,8 @@ if [[ "$*" == "--?" ]]; then
     Valid windows are w1d1h1-w4d7h23.\n
 
     Usage
-    patchtime.sh -t \t Default is to count first week from Monday, to set Tuesday.
+    patchtime.sh -a N \t Anchor weekday (1=Mon ... 7=Sun). Default 1 (Monday).
+    patchtime.sh -t \t Deprecated alias for -a 2 (Tuesday anchor).
     patchtime.sh -l \t Links to Disclamer of warranty and Terms and Conditions\n"
   exit 0
 fi
@@ -39,11 +40,22 @@ if [[ "$*" == "-l" ]]; then
   exit 0
 fi
 
-# Anchor day: Monday (default) or Tuesday (-t).
-USE_TUE=0
-if [[ "$*" == "-t" ]]; then
-  USE_TUE=1
-fi
+# Anchor weekday: 1=Mon (default) ... 7=Sun.  -t is shorthand for -a 2.
+ANCHOR=1
+args=("$@")
+for ((i=0; i<${#args[@]}; i++)); do
+  case "${args[i]}" in
+    -t) ANCHOR=2 ;;
+    -a)
+      ANCHOR="${args[i+1]:-}"
+      if ! [[ "$ANCHOR" =~ ^[1-7]$ ]]; then
+        echo "error: -a requires an integer 1..7" >&2
+        exit 2
+      fi
+      ((i++))
+      ;;
+  esac
+done
 
 # Today's date components (base-10 strip leading zeros).
 YEAR=$(date +%Y)
@@ -52,26 +64,23 @@ DAY=$(( 10#$(date +%d) ))
 CURRENTDAY=$(date +%u)
 CURRENTHOUR=$(date +%H)
 
-# get_patch_week YEAR MONTH DAY USE_TUE  -> echoes patch week number.
+# get_patch_week YEAR MONTH DAY ANCHOR  -> echoes patch week number.
 #
 # Mirrors patchtime.py's get_patch_week():
-#   ndw1   = days in first (possibly partial) week, Monday-first cal
-#   row    = which Mon-Sun row the day sits in (0 = first row)
-#   thresh = 6 (Tue mode) or 7 (Mon mode); ndw1 < thresh -> partial first row
+#   threshold = 8 - anchor; ndw1 < threshold -> partial first row
+#   ndw1      = days in first row, Monday-first cal
+#   row       = which Mon-Sun row the day sits in (0 = first row)
 get_patch_week() {
-  local y=$1 m=$2 d=$3 tue=$4
-  local threshold=7
-  (( tue == 1 )) && threshold=6
+  local y=$1 m=$2 d=$3 anchor=$4
+  local threshold=$(( 8 - anchor ))
 
-  # Tuesday override: Monday before a Tuesday 1st counts as w1.
-  if (( tue == 1 )); then
-    local tom_dom tom_dow
-    tom_dom=$(date -d "$y-$m-$d + 1 day" +%-d)
-    tom_dow=$(date -d "$y-$m-$d + 1 day" +%u)
-    if [[ "$tom_dom" == "1" && "$tom_dow" == "2" ]]; then
-      echo 1
-      return
-    fi
+  # Override: the day before an anchor-day 1st counts as w1.
+  local tom_dom tom_dow
+  tom_dom=$(date -d "$y-$m-$d + 1 day" +%-d)
+  tom_dow=$(date -d "$y-$m-$d + 1 day" +%u)
+  if [[ "$tom_dom" == "1" && "$tom_dow" == "$anchor" ]]; then
+    echo 1
+    return
   fi
 
   local first_dow ndw1 row
@@ -111,5 +120,5 @@ get_patch_week() {
   fi
 }
 
-CURRENTWEEK=$(get_patch_week "$YEAR" "$MONTH" "$DAY" "$USE_TUE")
+CURRENTWEEK=$(get_patch_week "$YEAR" "$MONTH" "$DAY" "$ANCHOR")
 echo "w${CURRENTWEEK}d${CURRENTDAY}h${CURRENTHOUR}"
