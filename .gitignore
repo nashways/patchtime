@@ -1,0 +1,11 @@
+# Build artifacts
+*.o
+patchtime_cli
+test_patchtime
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Editor / tooling state
+.claude/
