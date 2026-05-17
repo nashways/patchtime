@@ -1,23 +1,21 @@
 #!/usr/bin/env bash
-LC_TIME="en_US.UTF-8"
 #    Patch Time.  Prints a patch window name.
 #    Copyright (C) 2023  Nashway
-#   
+#
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
-#   
+#
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
-#   
+#
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-if [[ "$*" == "--?" ]]; then 
+if [[ "$*" == "--?" ]]; then
   echo -e "\n    Patch Time  Copyright (C) 2023  Nashway
     This program comes with ABSOLUTELY NO WARRANTY.\n
     This is free software, and you are welcome to redistribute it
@@ -32,7 +30,7 @@ if [[ "$*" == "--?" ]]; then
     patchtime.sh -t \t Default is to count first week from Monday, to set Tuesday.
     patchtime.sh -l \t Links to Disclamer of warranty and Terms and Conditions\n"
   exit 0
-  fi
+fi
 if [[ "$*" == "-l" ]]; then
   echo -e "    \e]8;;https://www.gnu.org/licenses/gpl-3.0.html#section15\aDisclaimer of Warranty\e]8;;\a"
   echo -e "    https://www.gnu.org/licenses/gpl-3.0.html#section15 \n"
@@ -41,116 +39,77 @@ if [[ "$*" == "-l" ]]; then
   exit 0
 fi
 
-# Credits:
-# Nashway (Nashways)
-# ifthenfi
-
-# Description:
-# Prints a patch window name based on counting weeks from first Monday or Tuesday of the month.
-# Example: w4d4h12 (The w4d4h12 means: week 4 of the month, Thursday and 12 a clock.)
-# This scipt will borrow the first few days from next months week 1 if it does not have a Monday or Tuesday to complete last week of the month.
-# It will also consider monday before a tuesday the first as week day 1 of week 1.
-# You can only trust w1d1 to w4d7 as week 5 does not always exist.
-
-# Set DAY="Tue" for Tuesday, anything else counts as Monday.
-DAY=""
+# Anchor day: Monday (default) or Tuesday (-t).
+USE_TUE=0
 if [[ "$*" == "-t" ]]; then
-  DAY="Tue"
+  USE_TUE=1
 fi
 
-# Get the number of the current day.
-# Need the base 10 due to 08
-D=$(( 10#$(date +%d) + 0))
-
-cal_var () {
-  # Get variables
-  if [[ -z $1 ]]; then
-    local MONTH=$(date +%m)
-  else
-    local MONTH=$1
-  fi
-  if [[ -z $2 ]]; then
-    local YEAR=$(date +%Y)
-  else
-    local YEAR=$2
-  fi
-
-  # Find Number of Days Week 1 of Next Month.
-  local NDW1NM=$(( $(cal -3 -m "$MONTH" "$YEAR" | head -n +3 | tail -n 1|tr ' ' '\n' | grep -v ^$ | tail -n 1) + 0 ))
-
-  # If first week has less than 7 days, fill upp end of previous month instead.
-  if [[ "$NDW1NM" -lt 7 ]]; then
-    # Print the head of this month.
-    cal -m "$MONTH" "$YEAR" | awk 'NF' | head -n -1
-
-    # Print this month and start adding days to the end of the month with NDW1NM to fill it up.
-    echo "$(cal -m "$MONTH" "$YEAR" | awk 'NF{p=$0}END{print p}' | sed 's/ *$//g')$( for (( i=1; i<="$NDW1NM"; i++ )); do echo -n " $(( $(cal -m "$MONTH" "$YEAR" | xargs echo | awk '{print $NF}') + $i ))" ; done)"
-    echo ""
-  else
-    # Print month as it is already complete.
-    cal -m "$MONTH" "$YEAR"
-  fi
-}
-
-find_currentweek () {	
-  # Find Number of Days Week 1 of this month.
-  local NDW1=$(( $(cal_var $(date "+%m %Y") | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0))
-  local PREVIOUS_MONTH=$(date "+%m %Y" --date "$(date +%Y-%m-01) -1 day")
-
-  if [[ $DAY == "Tue" ]]; then
-    # If NDW1 is greater than todays number and less than 5 we need to be on the fake end of previous month.
-    if [[ $NDW1 -ge $D ]] && [[ $NDW1 -le 5 ]]; then
-      # Reculate todays number, add todays number to number of days last month so we are on 29-38th.
-      D=$(expr $D + $(cal -m $PREVIOUS_MONTH | xargs echo | awk '{print $NF}'))
-
-      # If the first week of previous month has less than 5 days subtract 1 from the week calculation.
-      if [[ $(( $(cal_var $PREVIOUS_MONTH | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -le 5 ]]; then
-        CURRENTWEEK=$(( $(echo "$(cal_var $PREVIOUS_MONTH)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
-      else
-        CURRENTWEEK=$(( $(echo "$(cal_var $PREVIOUS_MONTH)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 0))
-      fi
-    else 
-      # Stay on this month and subtract 1 from current week if first week has less than 5 days.
-      if [[ $(( $(cal_var | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -le 5 ]]; then
-        CURRENTWEEK=$(( $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
-      else
-        CURRENTWEEK=$(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1)
-      fi
-    fi
-  
-    # Override if tomorrow is the 1 and a tuesday, count this monday as week 1. need base 10 here
-    if [ $(( 10#$(date +%d --date="next day") + 0)) == 1 ] && [ "$(/bin/date +\%a --date="next day")" == "Tue" ]; then
-      CURRENTWEEK=$((1))
-    fi
-  else
-    # If NDW1 is greater than todays number and less than 7 we need to be on the fake end of previous month.
-    if [[ $NDW1 -ge $D ]] && [[ $NDW1 -lt 7 ]]; then
-      # Reculate todays number, add todays number to number of days last month so we are on 29-38th. borken
-      D=$(expr $D + $(cal -m $PREVIOUS_MONTH | xargs echo | awk '{print $NF}'))
-
-      # If the first week of previous month has less than 7 days subtract 1 from the week calculation.
-      if [[ $(( $(cal_var $PREVIOUS_MONTH | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -lt 7 ]]; then
-        CURRENTWEEK=$(( $(echo "$(cal_var $PREVIOUS_MONTH)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
-      else
-      CURRENTWEEK=$(( $(echo "$(cal_var $PREVIOUS_MONTH)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 0))
-      fi
-    else
-      # Stay on this month and subtract 1 from current week if first week has less than 7 days.
-      if [[ $(( $(cal_var | head -n +3 | tail -n 1 | tr ' ' '\n' | grep -v ^$ | wc -l) + 0)) -lt 7 ]]; then
-        CURRENTWEEK=$(( $(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1) - 1))
-      else
-        CURRENTWEEK=$(echo "$(cal_var)$(echo -n " ")" | sed -n "3,$ p" | grep -En "^$D | $D | $D$" | cut -d ":" -f1 | cut -d " " -f1)
-      fi
-    fi
-  fi
-}
-
-# Find the day of the week.
+# Today's date components (base-10 strip leading zeros).
+YEAR=$(date +%Y)
+MONTH=$(( 10#$(date +%m) ))
+DAY=$(( 10#$(date +%d) ))
 CURRENTDAY=$(date +%u)
+CURRENTHOUR=$(date +%H)
 
-# Find the current hour.
-CURRENTHOUR=$(date +"%H")
+# get_patch_week YEAR MONTH DAY USE_TUE  -> echoes patch week number.
+#
+# Mirrors patchtime.py's get_patch_week():
+#   ndw1   = days in first (possibly partial) week, Monday-first cal
+#   row    = which Mon-Sun row the day sits in (0 = first row)
+#   thresh = 6 (Tue mode) or 7 (Mon mode); ndw1 < thresh -> partial first row
+get_patch_week() {
+  local y=$1 m=$2 d=$3 tue=$4
+  local threshold=7
+  (( tue == 1 )) && threshold=6
 
-find_currentweek
-echo "w${CURRENTWEEK}d${CURRENTDAY}h$CURRENTHOUR"
+  # Tuesday override: Monday before a Tuesday 1st counts as w1.
+  if (( tue == 1 )); then
+    local tom_dom tom_dow
+    tom_dom=$(date -d "$y-$m-$d + 1 day" +%-d)
+    tom_dow=$(date -d "$y-$m-$d + 1 day" +%u)
+    if [[ "$tom_dom" == "1" && "$tom_dow" == "2" ]]; then
+      echo 1
+      return
+    fi
+  fi
 
+  local first_dow ndw1 row
+  first_dow=$(date -d "$y-$m-01" +%u)
+  ndw1=$(( 8 - first_dow ))
+  if (( d <= ndw1 )); then
+    row=0
+  else
+    row=$(( (d - ndw1 + 6) / 7 ))
+  fi
+
+  if (( ndw1 < threshold )); then
+    if (( row == 0 )); then
+      # Partial first row belongs to previous month's last patch week.
+      local pm_y pm_m pm_first_dow pm_ndw1 pm_days pm_last_row week
+      if (( m == 1 )); then
+        pm_y=$(( y - 1 )); pm_m=12
+      else
+        pm_y=$y; pm_m=$(( m - 1 ))
+      fi
+      pm_first_dow=$(date -d "$pm_y-$pm_m-01" +%u)
+      pm_ndw1=$(( 8 - pm_first_dow ))
+      pm_days=$(date -d "$pm_y-$pm_m-01 + 1 month - 1 day" +%-d)
+      if (( pm_days <= pm_ndw1 )); then
+        pm_last_row=0
+      else
+        pm_last_row=$(( (pm_days - pm_ndw1 + 6) / 7 ))
+      fi
+      week=$(( pm_last_row + 1 ))
+      (( pm_ndw1 < threshold )) && week=$(( week - 1 ))
+      echo "$week"
+    else
+      echo "$row"
+    fi
+  else
+    echo $(( row + 1 ))
+  fi
+}
+
+CURRENTWEEK=$(get_patch_week "$YEAR" "$MONTH" "$DAY" "$USE_TUE")
+echo "w${CURRENTWEEK}d${CURRENTDAY}h${CURRENTHOUR}"
