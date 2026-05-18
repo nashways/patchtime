@@ -1,11 +1,15 @@
-# The problem
-So the problem is to schedule tasks monthly and consecutively in a reliable manner. Let say you want **Leg A** of a solution to do someting like patching on the first tuesday of the month and **Leg B** on the first wednesday. Using cron this would be a mess as **leg A** would sometimes be executed six days after **Leg B** depending on the month.
+# patchtime — week-of-month scheduling for cron
+
+Small bash and Python utilities that print a *patch window* like `w2d6h23` — week 2 of the month, Saturday, 23:00 — so you can drive cron jobs by the first/second/third/fourth Monday or Tuesday of every month. Useful for Patch-Tuesday-style staged rollouts where leg A and leg B of a redundant system have to update on consecutive but predictable days, every month, without the spacing drift that plain `0 9 1-7 * 1` (first Monday) gives you. Companion project: [cronie-patchtime](https://github.com/nashways/cronie-patchtime) — a fork of cronie with this idea built into the daemon as an `@patch` crontab keyword.
+
+## The problem
+You want **Leg A** of a redundant system patched on the first Tuesday of the month and **Leg B** on the first Wednesday. Plain cron makes this awkward — `0 9 1-7 * 2` and `0 9 1-7 * 3` work in some months and misfire in others depending on the day the month starts on, and the spacing between the two firings changes monthly.
 
 ## The solution
-Start counting weeks at a repeatable point in the month like the first monday or first tuesday. A little bit like Microsoft defined "Patch tuesday" as the second tuesday of the month at 10:00 PST.
+Count weeks from a repeatable anchor day in the month — the first Monday, first Tuesday, or any other ISO weekday 1-7. That's how Microsoft defines "Patch Tuesday" (second Tuesday of the month at 10:00 PST), and it's how patchtime works.
 
 ## Description
-This/these litte script will tell you what day of the month it is. Sound trivial but it prints time like this **w2d6h23**. The output is simple **w** for week, **d** for day **h** for hour.
+`patchtime.sh` and `patchtime.py` print the current patch window as `w2d6h23`: **w** for week (1-4), **d** for day (1-7, ISO Monday=1), **h** for hour (00-23).
 
 The script can count weeks from the first Monday of Tuesday of the month. When counting from Tuesdays, the whole week including the Monday before Tuesday is considered part of the week. This is when you take out a calendar and have a look. The last week of the month will sometimes not be a complete week, the script will then "steal" days from next month as they are not otherwise used in next month's week one.
 
