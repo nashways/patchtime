@@ -56,8 +56,25 @@ w2d1h08
 0 * * * * bash -c '/usr/bin/awx job_templates launch "Monitoring Schedule Downtime" --extra_vars "survey_hosts: patchwindow_$(/usr/bin/faketime -f "+2h" /opt/scripts/patchtime.sh -t)"'  
 0 * * * * bash -c '/usr/bin/awx job_templates launch "Patch OS" --extra_vars "survey_hosts: patchwindow_$(/opt/scripts/patchtime.sh -t)"'  
 
+## Native cron support — cronie-patchtime
+A fork of cronie with a built-in `@patch` keyword lives at
+https://github.com/nashways/cronie-patchtime (branch `patchtime`).
+It teaches cron the same week-of-month math, so you can drop the
+shell-gating shown above and write entries like:
+
+    @patch w1 d1 h00  /opt/scripts/sync_repos.sh
+    @patch w1 d1 h10  /opt/scripts/patch_test_leg-A.sh
+    @patch w3 d1 h00  /opt/scripts/publish_phase2.sh
+
+Syntax: `@patch [a<N>] w<list> d<list> [h<list>] [m<list>]  command`,
+where `a` is the anchor weekday 1..7 (default 1=Monday), and `w`/`d`/`h`/`m`
+accept the same list/range/`*` syntax as ordinary cron fields. Build
+with `./configure --enable-patchtime` (or `--disable-patchtime` for
+vanilla cronie). See the `crontab(5)` man page in the fork for full
+docs and examples.
+
 ## Roadmap
-It would be cool to rewrite this is something other than bash and package it in a rpm. Or even extend a version of cron with this stuff.
+It would be cool to rewrite this is something other than bash and package it in a rpm. ~~Or even extend a version of cron with this stuff.~~ Cron extension done — see cronie-patchtime above.
 
 ## Contributing
 Yes, please!, Just say hi and I will add you as a collaborator if you want.
