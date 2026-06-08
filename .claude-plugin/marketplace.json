@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "patchtime",
+  "description": "Nashway's patchtime — week-of-month patch-window scheduling for Claude Code.",
+  "owner": {
+    "name": "Nashway",
+    "url": "https://github.com/nashways"
+  },
+  "plugins": [
+    {
+      "name": "patchtime",
+      "source": "./",
+      "description": "Compute and match week-of-month patch windows (w2d6h23) and gate cron, /loop, or scheduled agents on them.",
+      "category": "automation",
+      "license": "GPL-3.0",
+      "homepage": "https://github.com/nashways/patchtime"
+    }
+  ]
+}

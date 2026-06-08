@@ -1,0 +1,12 @@
+{
+  "name": "patchtime",
+  "version": "0.1.0",
+  "description": "Week-of-month patch-window scheduling (w2d6h23 = 2nd Saturday, 23:00) for cron, /loop, and scheduled agents — express first/second/third Tuesday-style cadences plain cron can't.",
+  "author": {
+    "name": "Nashway"
+  },
+  "homepage": "https://github.com/nashways/patchtime",
+  "repository": "https://github.com/nashways/patchtime",
+  "license": "GPL-3.0",
+  "keywords": ["cron", "scheduling", "patching", "patch-tuesday", "week-of-month", "automation", "devops"]
+}
