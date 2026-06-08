@@ -1,5 +1,5 @@
 ---
-description: Run a task on a recurring patchtime window (week-of-month), e.g. /patchloop a2 w2d2h10 pull the autoinstall logs. The session-level analog of cronie-patchtime's @patch keyword.
+description: Run a task on a recurring patchtime window (week-of-month), e.g. /patchtime:patchloop a2 w2d2h10 pull the autoinstall logs. The session-level analog of cronie-patchtime's @patch keyword.
 argument-hint: "[aN] wNdNhNN <task>"
 ---
 
@@ -29,7 +29,7 @@ Parse them as: `[aN] [@]wNdNhNN <task...>`
    window matches. Free-form.
 
 If no valid `wNdNhNN` token is present, do **not** start a loop. Print the usage
-(`/patchloop [aN] wNdNhNN <task>`) with a concrete example and stop.
+(`/patchtime:patchloop [aN] wNdNhNN <task>`) with a concrete example and stop.
 
 ## What to do
 
@@ -58,7 +58,7 @@ If no valid `wNdNhNN` token is present, do **not** start a loop. Print the usage
 
 ## Example
 
-`/patchloop a2 w2d2h10 pull the hlx014 and hlx015 autoinstall logs and summarize failures`
+`/patchtime:patchloop a2 w2d2h10 pull the hlx014 and hlx015 autoinstall logs and summarize failures`
 
 → anchor Tuesday, target second-Tuesday 10:00 (`w2d2h10`), and on match it pulls
 and summarizes those logs.
